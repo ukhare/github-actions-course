@@ -19,6 +19,7 @@ jobs:
         with:
           repository: ukhare/github-actions
           path: .github/actions/shared
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
