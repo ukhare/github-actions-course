@@ -1,4 +1,4 @@
-name: Build 03-app-dotnet Project
+name: Build single dotnet Project
 
 on:
   push:
