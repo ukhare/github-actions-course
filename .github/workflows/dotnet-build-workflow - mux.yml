@@ -1,58 +1,45 @@
 name: Dynamically Build and test .NET Projects
 
 on:
-  # Run on a push to master or any release branch
   push:
-    branches:
-      - "master"
-      - "release"
-
-  # Run against any PR
+    branches: [main]
   pull_request:
-  # Allow manual execution
-
   workflow_dispatch:
-    inputs:
-      # if there is one or more existing dot net projects in 'devops-ci-workflow-shared' repo
-      run_build:
-        description: 'Run the test for an existing dotnet project in repo'
-        required: true
-        default: 'false'
 
 jobs:
   build:
     name: build-${{ matrix.project.project-name }}
-    runs-on: [self-hosted, medium-amd64]
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        dotnet-version: ['7.0.x']
+        dotnet-version: [ '7.0.x' ]
         project:
-          - project-name: my-app-dotnet-01
-            app-dir: my-app-dotnet-01
-          - project-name: my-app-dotnet-02
-            app-dir: my-app-dotnet-02
+          - project-name: app-dotnet-01
+            app-dir: 03-app-dotnet/03-app-dotnet.csproj
+          - project-name: app-dotnet-02
+            app-dir: 04-app-dotnet/04-app-dotnet.csproj
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Code (github-actions-course)
         uses: actions/checkout@v4
 
-      - name: Setup .NET ${{ matrix.dotnet-version }}
+      - name: Checkout Shared GitHub Actions Repo
+        uses: actions/checkout@v4
+        with:
+          repository: ukhare/github-actions
+          path: .github/actions/shared
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-
-      - name: Create .NET Project - ${{ matrix.project.project-name }}
-        if: github.event_name != 'workflow_dispatch'
-        shell: bash
-        run: |
-          rm -rf "${{ matrix.project.app-dir }}"
-          dotnet new console -n "${{ matrix.project.project-name }}" -o "${{ matrix.project.app-dir }}"
+          dotnet-version: '7.0.x'
 
       - name: Build ${{ matrix.project.project-name }}
-        uses: ./.github/actions/dotnet-build-action
+        uses: ./.github/actions/shared/.github/actions/dotnet-build-action
         with:
           project-name: ${{ matrix.project.project-name }}
-          app-dir: ${{ matrix.project.app-dir }}/${{ matrix.project.project-name }}.csproj
+          app-dir: ${{ matrix.project.app-dir }}
           build-configuration: Release
           upload_build: true
