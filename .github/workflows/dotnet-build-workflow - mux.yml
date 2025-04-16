@@ -10,6 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        dotnet-version: [ '7.0.x' ]
+        project:
+          - project-name: app-dotnet-01
+            app-dir: 03-app-dotnet/03-app-dotnet.csproj
+          - project-name: app-dotnet-02
+            app-dir: 04-app-dotnet/04-app-dotnet.csproj
+
     steps:
       - name: Checkout Code (github-actions-course)
         uses: actions/checkout@v4
@@ -26,10 +35,10 @@ jobs:
         with:
           dotnet-version: '7.0.x'
 
-      - name: Run Shared Dotnet Build Action
+      - name: Build ${{ matrix.project.project-name }}
         uses: ./.github/actions/shared/.github/actions/dotnet-build-action
         with:
-          project-name: app-dotnet
-          app-dir: 03-app-dotnet/03-app-dotnet.csproj
+          project-name: ${{ matrix.project.project-name }}
+          app-dir: ${{ matrix.project.app-dir }}
           build-configuration: Release
           upload_build: true
